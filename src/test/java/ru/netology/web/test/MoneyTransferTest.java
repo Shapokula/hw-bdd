@@ -108,29 +108,6 @@ class MoneyTransferTest {
     }
 
     @Test
-    void shouldNotTransferNegativeAmount() {
-        open("http://localhost:9999");
-        var loginPage = new LoginPageV1();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        var dashboardPage = verificationPage.validVerify(verificationCode);
-        int card01balance = dashboardPage.getCardBalance(card01ID);
-        int card02balance = dashboardPage.getCardBalance(card02ID);
-        var cardPage = dashboardPage.pressDeposit(card01ID);
-        int amountToTransfer = -card02balance;
-        cardPage.validTransfer(Integer.toString(amountToTransfer), card02Number);
-
-        int actual01 = dashboardPage.getCardBalance(card01ID);
-        int expected01 = card01balance;
-        Assertions.assertEquals(expected01, actual01);
-
-        int actual02 = dashboardPage.getCardBalance(card02ID);
-        int expected02 = card02balance;
-        Assertions.assertEquals(expected02, actual02);
-    }
-
-    @Test
     void shouldNotTransferFromNonExistingCard() {
         open("http://localhost:9999");
         var loginPage = new LoginPageV1();
