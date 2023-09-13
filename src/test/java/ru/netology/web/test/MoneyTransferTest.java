@@ -12,29 +12,27 @@ import static com.codeborne.selenide.Selenide.open;
 
 class MoneyTransferTest {
 
-    static String card01Number = "5559 0000 0000 0001";
-    static String card01ID = "92df3f1c-a033-48e6-8390-206f6b1f56c0";
-    static String card02Number = "5559 0000 0000 0002";
-    static String card02ID = "0f3f5c2a-249e-4c3d-8287-09f7a039391d";
-    static String nonExistingCardNumber = "5559 0000 0000 0003";
+    static DataHelper.CardInfo card01Info = DataHelper.getCardInfo(1);
+    static DataHelper.CardInfo card02Info = DataHelper.getCardInfo(2);
+    static DataHelper.CardInfo nonExistentCardInfo = DataHelper.getCardInfo(3);
 
-    @AfterAll
-    static void setUp() {
+    @BeforeEach
+    void makeBalancesEqual() {
         open("http://localhost:9999");
         var loginPage = new LoginPageV1();
         var authInfo = DataHelper.getAuthInfo();
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         var dashboardPage = verificationPage.validVerify(verificationCode);
-        int card01Balance = dashboardPage.getCardBalance(card01ID);
+        int card01Balance = dashboardPage.getCardBalance(card01Info.getId());
         if (card01Balance < 10_000) {
-            var cardPage = dashboardPage.pressDeposit(card01ID);
+            var cardPage = dashboardPage.pressDeposit(card01Info.getId());
             int amountToTransfer = 10_000 - card01Balance;
-            cardPage.validTransfer(Integer.toString(amountToTransfer), card02Number);
+            cardPage.validTransfer(Integer.toString(amountToTransfer), card02Info.getNumber());
         } else if (card01Balance > 10_000) {
-            var cardPage = dashboardPage.pressDeposit(card02ID);
+            var cardPage = dashboardPage.pressDeposit(card02Info.getId());
             int amountToTransfer = card01Balance - 10_000;
-            cardPage.validTransfer(Integer.toString(amountToTransfer), card01Number);
+            cardPage.validTransfer(Integer.toString(amountToTransfer), card01Info.getNumber());
         }
     }
 
@@ -46,17 +44,17 @@ class MoneyTransferTest {
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         var dashboardPage = verificationPage.validVerify(verificationCode);
-        int card01balance = dashboardPage.getCardBalance(card01ID);
-        int card02balance = dashboardPage.getCardBalance(card02ID);
-        var cardPage = dashboardPage.pressDeposit(card01ID);
+        int card01balance = dashboardPage.getCardBalance(card01Info.getId());
+        int card02balance = dashboardPage.getCardBalance(card02Info.getId());
+        var cardPage = dashboardPage.pressDeposit(card01Info.getId());
         int amountToTransfer = card02balance / 2;
-        cardPage.validTransfer(Integer.toString(amountToTransfer), card02Number);
+        cardPage.validTransfer(Integer.toString(amountToTransfer), card02Info.getNumber());
 
-        int actual01 = dashboardPage.getCardBalance(card01ID);
+        int actual01 = dashboardPage.getCardBalance(card01Info.getId());
         int expected01 = card01balance + amountToTransfer;
         Assertions.assertEquals(expected01, actual01);
 
-        int actual02 = dashboardPage.getCardBalance(card02ID);
+        int actual02 = dashboardPage.getCardBalance(card02Info.getId());
         int expected02 = card02balance - amountToTransfer;
         Assertions.assertEquals(expected02, actual02);
     }
@@ -69,17 +67,17 @@ class MoneyTransferTest {
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         var dashboardPage = verificationPage.validVerify(verificationCode);
-        int card01balance = dashboardPage.getCardBalance(card01ID);
-        int card02balance = dashboardPage.getCardBalance(card02ID);
-        var cardPage = dashboardPage.pressDeposit(card02ID);
+        int card01balance = dashboardPage.getCardBalance(card01Info.getId());
+        int card02balance = dashboardPage.getCardBalance(card02Info.getId());
+        var cardPage = dashboardPage.pressDeposit(card02Info.getId());
         int amountToTransfer = card01balance / 2;
-        cardPage.validTransfer(Integer.toString(amountToTransfer), card01Number);
+        cardPage.validTransfer(Integer.toString(amountToTransfer), card01Info.getNumber());
 
-        int actual01 = dashboardPage.getCardBalance(card01ID);
+        int actual01 = dashboardPage.getCardBalance(card01Info.getId());
         int expected01 = card01balance - amountToTransfer;
         Assertions.assertEquals(expected01, actual01);
 
-        int actual02 = dashboardPage.getCardBalance(card02ID);
+        int actual02 = dashboardPage.getCardBalance(card02Info.getId());
         int expected02 = card02balance + amountToTransfer;
         Assertions.assertEquals(expected02, actual02);
     }
@@ -92,17 +90,17 @@ class MoneyTransferTest {
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         var dashboardPage = verificationPage.validVerify(verificationCode);
-        int card01balance = dashboardPage.getCardBalance(card01ID);
-        int card02balance = dashboardPage.getCardBalance(card02ID);
-        var cardPage = dashboardPage.pressDeposit(card02ID);
+        int card01balance = dashboardPage.getCardBalance(card01Info.getId());
+        int card02balance = dashboardPage.getCardBalance(card02Info.getId());
+        var cardPage = dashboardPage.pressDeposit(card02Info.getId());
         int amountToTransfer = card01balance + 1;
-        cardPage.validTransfer(Integer.toString(amountToTransfer), card01Number);
+        cardPage.validTransfer(Integer.toString(amountToTransfer), card01Info.getNumber());
 
-        int actual01 = dashboardPage.getCardBalance(card01ID);
+        int actual01 = dashboardPage.getCardBalance(card01Info.getId());
         int expected01 = card01balance;
         Assertions.assertEquals(expected01, actual01);
 
-        int actual02 = dashboardPage.getCardBalance(card02ID);
+        int actual02 = dashboardPage.getCardBalance(card02Info.getId());
         int expected02 = card02balance;
         Assertions.assertEquals(expected02, actual02);
     }
@@ -115,11 +113,10 @@ class MoneyTransferTest {
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         var dashboardPage = verificationPage.validVerify(verificationCode);
-        int card01balance = dashboardPage.getCardBalance(card01ID);
-        int card02balance = dashboardPage.getCardBalance(card02ID);
-        var cardPage = dashboardPage.pressDeposit(card01ID);
+        int card01balance = dashboardPage.getCardBalance(card01Info.getId());
+        int card02balance = dashboardPage.getCardBalance(card02Info.getId());
+        var cardPage = dashboardPage.pressDeposit(card01Info.getId());
         int amountToTransfer = 2000;
-        cardPage.validTransfer(Integer.toString(amountToTransfer), nonExistingCardNumber);
-        $("[data-test-id=error-notification]").shouldBe(Condition.visible, Duration.ofSeconds(5));
+        cardPage.nonValidTransfer(Integer.toString(amountToTransfer), nonExistentCardInfo.getNumber());
     }
 }

@@ -3,6 +3,8 @@ package ru.netology.web.page;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
@@ -18,5 +20,12 @@ public class CardPage {
         amountField.setValue(amount);
         fromField.setValue(from);
         transferButton.click();
+    }
+
+    public void nonValidTransfer(String amount, String from) {
+        amountField.setValue(amount);
+        fromField.setValue(from);
+        transferButton.click();
+        $("[data-test-id=error-notification]").shouldBe(Condition.visible, Duration.ofSeconds(5));
     }
 }
